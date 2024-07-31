@@ -1,7 +1,7 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
 
-out vec2 textureCoords;
+out vec4 clipSpace;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -9,6 +9,6 @@ uniform mat4 projection;
 
 void main()
 {
-	gl_Position = projection * view * model * vec4(aPos, 1.0f);
-	textureCoords = vec2(aPos.x/2.0 + 0.5, aPos.y/2.0 + 0.5);
+	clipSpace = projection * view * model * vec4(aPos, 1.0f);
+	gl_Position = clipSpace;
 }

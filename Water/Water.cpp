@@ -79,7 +79,6 @@ int main()
     // build and compile our shader program
     // ------------------------------------
     Shader waterShader("water.vs", "water.fs");
-    Shader screenShader("reflection.vs", "reflection.fs");
     Shader poolShader("basic_shader.vs", "basic_shader.fs");
 
     // load models
@@ -207,7 +206,8 @@ int main()
         std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
+    waterShader.setInt("reflectionTexture", 0);
+    waterShader.setInt("refractionTexture", 1);
 
 
     // render loop
@@ -231,31 +231,39 @@ int main()
         // ------------------------
         //modify camera
         float distance = 2 * (camera.Position.y - waterHeight);
-        camera.Position.y -= distance;
-        camera.Pitch = -camera.Pitch;
+        glm::vec3 newPosition = camera.Position;
+        newPosition.y -= distance;
+        float newPitch = -1.0 * camera.Pitch;
+
+        glm::vec3 newFront;
+        newFront.x = cos(glm::radians(camera.Yaw)) * cos(glm::radians(newPitch));
+        newFront.y = sin(glm::radians(newPitch));
+        newFront.z = sin(glm::radians(camera.Yaw)) * cos(glm::radians(newPitch));
+        newFront = glm::normalize(newFront);
+
+        glm::vec3 newRight = glm::normalize(glm::cross(newFront, glm::vec3(0,1,0)));
+        glm::vec3 newUp = glm::normalize(glm::cross(newRight, newFront));
+
         // bind to framebuffer and draw scene as we normally would to color texture 
         glBindFramebuffer(GL_FRAMEBUFFER, reflectionFramebuffer);
         // make sure we clear the framebuffer's content
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //render pool
         poolShader.use();
         glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = camera.GetViewMatrix();
+        glm::mat4 view = glm::lookAt(newPosition, newPosition + newFront, newUp);
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         poolShader.setMat4("view", view);
         poolShader.setMat4("projection", projection);
         poolShader.setMat4("model", model);
         poolShader.setVec4("plane", glm::vec4(0, 1, 0, waterHeight)); //set clip plane
         poolModel.Draw(poolShader);
-        //fix camera
-        camera.Position.y += distance;
-        camera.Pitch = -camera.Pitch;
         
         //render refraction texture
         // ------------------------
         glBindFramebuffer(GL_FRAMEBUFFER, refractionFramebuffer);
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         poolShader.use();
         model = glm::mat4(1.0f);
@@ -294,6 +302,13 @@ int main()
         waterShader.setMat4("view", view);
         waterShader.setMat4("projection", projection);
         glBindVertexArray(waterVAO);
+
+        // bind textures on corresponding texture units
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, reflectionTextureColorbuffer);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, refractionTextureColorbuffer);
+
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 15; j++) {
                 model = glm::mat4(1.0f);
@@ -301,22 +316,10 @@ int main()
                 model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
                 waterShader.setMat4("model", model);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
-
             }
         }
         glBindVertexArray(0);
 
-
-        // now draw the mirror quad with screen texture
-        // --------------------------------------------
-        glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
-
-        screenShader.use();
-        glBindVertexArray(quadVAO);
-        glBindTexture(GL_TEXTURE_2D, reflectionTextureColorbuffer);	// use the color attachment texture as the texture of the quad plane
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        glEnable(GL_DEPTH_TEST); // renable depth testing
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
