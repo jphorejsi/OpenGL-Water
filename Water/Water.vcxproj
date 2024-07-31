@@ -138,8 +138,8 @@
   <ItemGroup>
     <None Include="basic_shader.fs" />
     <None Include="basic_shader.vs" />
-    <None Include="reflection.fs" />
-    <None Include="reflection.vs" />
+    <None Include="test.fs" />
+    <None Include="test.vs" />
     <None Include="water.fs" />
     <None Include="water.vs" />
   </ItemGroup>

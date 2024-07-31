@@ -80,6 +80,7 @@ int main()
     // ------------------------------------
     Shader waterShader("water.vs", "water.fs");
     Shader poolShader("basic_shader.vs", "basic_shader.fs");
+    Shader screenShader("test.vs", "test.fs");
 
     // load models
     //------------
@@ -145,69 +146,74 @@ int main()
     // framebuffer configuration
     // -------------------------
     //reflection
+    //create frameebuffer
     unsigned int reflectionFramebuffer;
     glGenFramebuffers(1, &reflectionFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, reflectionFramebuffer);
-    // create a color attachment texture
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+    //// create a color attachment texture
     unsigned int reflectionTextureColorbuffer;
     glGenTextures(1, &reflectionTextureColorbuffer);
     glBindTexture(GL_TEXTURE_2D, reflectionTextureColorbuffer);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTextureColorbuffer, 0);
-    // create a depth attachment texture
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, reflectionTextureColorbuffer, 0);
+    //// create a depth attachment texture
     unsigned int reflectionTextureDepthbuffer;
     glGenTextures(1, &reflectionTextureDepthbuffer);
     glBindTexture(GL_TEXTURE_2D, reflectionTextureDepthbuffer);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, reflectionTextureDepthbuffer, 0);
-    // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, reflectionTextureDepthbuffer, 0);
+    //// create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
     unsigned int reflectionRBO;
     glGenRenderbuffers(1, &reflectionRBO);
     glBindRenderbuffer(GL_RENDERBUFFER, reflectionRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, reflectionRBO); // now actually attach it
-    // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, reflectionRBO); // now actually attach it
+    //// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    //refraction
+    ////refraction
+    //create framebuffer
     unsigned int refractionFramebuffer;
     glGenFramebuffers(1, &refractionFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, refractionFramebuffer);
-    // create a color attachment texture
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+    //// create a color attachment texture
     unsigned int refractionTextureColorbuffer;
     glGenTextures(1, &refractionTextureColorbuffer);
     glBindTexture(GL_TEXTURE_2D, refractionTextureColorbuffer);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionTextureColorbuffer, 0);
-    // create a depth attachment texture
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, refractionTextureColorbuffer, 0);
+    //// create a depth attachment texture
     unsigned int refractionTextureDepthbuffer;
     glGenTextures(1, &refractionTextureDepthbuffer);
     glBindTexture(GL_TEXTURE_2D, refractionTextureDepthbuffer);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, refractionTextureDepthbuffer, 0);
-    // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, refractionTextureDepthbuffer, 0);
+    //// create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
     unsigned int refractionRBO;
     glGenRenderbuffers(1, &refractionRBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, refractionRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, refractionRBO); // now actually attach it
-    // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+    glBindRenderbuffer(GL_RENDERBUFFER, reflectionRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT); // use a single renderbuffer object for both a depth AND stencil buffer.
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, reflectionRBO); // now actually attach it
+    //// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    waterShader.setInt("reflectionTexture", 0);
-    waterShader.setInt("refractionTexture", 1);
+
 
 
     // render loop
@@ -229,27 +235,23 @@ int main()
 
         //render reflection texture
         // ------------------------
-        //modify camera
-        float distance = 2 * (camera.Position.y - waterHeight);
-        glm::vec3 newPosition = camera.Position;
-        newPosition.y -= distance;
-        float newPitch = -1.0 * camera.Pitch;
-
-        glm::vec3 newFront;
-        newFront.x = cos(glm::radians(camera.Yaw)) * cos(glm::radians(newPitch));
-        newFront.y = sin(glm::radians(newPitch));
-        newFront.z = sin(glm::radians(camera.Yaw)) * cos(glm::radians(newPitch));
-        newFront = glm::normalize(newFront);
-
-        glm::vec3 newRight = glm::normalize(glm::cross(newFront, glm::vec3(0,1,0)));
-        glm::vec3 newUp = glm::normalize(glm::cross(newRight, newFront));
+            //modify camera
+            float distance = 2 * (camera.Position.y - waterHeight);
+            glm::vec3 newPosition = camera.Position;
+            newPosition.y -= distance;
+            float newPitch = -1.0 * camera.Pitch;
+            glm::vec3 newFront;
+            newFront.x = cos(glm::radians(camera.Yaw)) * cos(glm::radians(newPitch));
+            newFront.y = sin(glm::radians(newPitch));
+            newFront.z = sin(glm::radians(camera.Yaw)) * cos(glm::radians(newPitch));
+            newFront = glm::normalize(newFront);
+            glm::vec3 newRight = glm::normalize(glm::cross(newFront, glm::vec3(0,1,0)));
+            glm::vec3 newUp = glm::normalize(glm::cross(newRight, newFront));
 
         // bind to framebuffer and draw scene as we normally would to color texture 
         glBindFramebuffer(GL_FRAMEBUFFER, reflectionFramebuffer);
-        // make sure we clear the framebuffer's content
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //render pool
         poolShader.use();
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = glm::lookAt(newPosition, newPosition + newFront, newUp);
@@ -259,7 +261,9 @@ int main()
         poolShader.setMat4("model", model);
         poolShader.setVec4("plane", glm::vec4(0, 1, 0, waterHeight)); //set clip plane
         poolModel.Draw(poolShader);
-        
+
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         //render refraction texture
         // ------------------------
         glBindFramebuffer(GL_FRAMEBUFFER, refractionFramebuffer);
@@ -304,10 +308,13 @@ int main()
         glBindVertexArray(waterVAO);
 
         // bind textures on corresponding texture units
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, reflectionTextureColorbuffer);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, refractionTextureColorbuffer);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, reflectionTextureColorbuffer);
+        //glActiveTexture(GL_TEXTURE1);
+        //glBindTexture(GL_TEXTURE_2D, refractionTextureColorbuffer);
+
+        //glUniform1i(glGetUniformLocation(waterShader.ID, "reflectionTexture"), 0); // Texture unit 0
+        //glUniform1i(glGetUniformLocation(waterShader.ID, "refractionTexture"), 1); // Texture unit 1
 
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 15; j++) {
@@ -319,6 +326,11 @@ int main()
             }
         }
         glBindVertexArray(0);
+
+        screenShader.use();
+        glBindVertexArray(quadVAO);
+        glBindTexture(GL_TEXTURE_2D, refractionTextureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

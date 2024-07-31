@@ -25,8 +25,8 @@
   <ItemGroup>
     <None Include="water.vs" />
     <None Include="water.fs" />
-    <None Include="reflection.vs" />
-    <None Include="reflection.fs" />
+    <None Include="test.vs" />
+    <None Include="test.fs" />
     <None Include="basic_shader.fs" />
     <None Include="basic_shader.vs" />
   </ItemGroup>
