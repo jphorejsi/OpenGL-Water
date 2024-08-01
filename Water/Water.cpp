@@ -85,7 +85,7 @@ int main()
 
     // load models
     //------------
-    Model poolModel("resources/island/island.obj");
+    Model poolModel("resources/fountain/horniman-fountain-edit.obj");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -320,8 +320,9 @@ int main()
         poolShader.use();
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(1, 0, 0));
-        model = glm::translate(model, glm::vec3(0, -3, 0));
+        model = glm::scale(model, glm::vec3(2, 2, 2));
+        model = glm::rotate(model, glm::radians(00.0f), glm::vec3(1, 0, 0));
+        model = glm::translate(model, glm::vec3(0, -3.65, 0));
         glm::mat4 view = glm::lookAt(newPosition, newPosition + newFront, newUp);
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         poolShader.setMat4("view", view);
@@ -353,9 +354,9 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         poolShader.use();
         model = glm::mat4(1.0f);
-        model = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(1, 0, 0));
-        model = glm::translate(model, glm::vec3(0, -3, 0));
+        model = glm::scale(model, glm::vec3(2, 2, 2));
+        model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1, 0, 0));
+        model = glm::translate(model, glm::vec3(0, -3.65, 0));
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         poolShader.setMat4("view", view);
@@ -377,8 +378,9 @@ int main()
         //render pool
         poolShader.use();
         model = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(1, 0, 0));
-        model = glm::translate(model, glm::vec3(0, -3, 0));
+        model = glm::scale(model, glm::vec3(2, 2, 2));
+        model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1, 0, 0));
+        model = glm::translate(model, glm::vec3(0, -3.65, 0));
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         poolShader.setMat4("view", view);
@@ -403,15 +405,47 @@ int main()
         glUniform1i(glGetUniformLocation(waterShader.ID, "reflectionTexture"), 0); // Texture unit 0
         glUniform1i(glGetUniformLocation(waterShader.ID, "refractionTexture"), 1); // Texture unit 1
 
-        for (int i = 0; i < 25; i++) {
-            for (int j = 0; j < 20; j++) {
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
                 model = glm::mat4(1.0f);
-                model = glm::translate(model, glm::vec3(i - 10, waterHeight, j - 10));
+                model = glm::translate(model, glm::vec3(i - 2, waterHeight, j - 2));
                 model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
                 waterShader.setMat4("model", model);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
             }
         }
+        //fill
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(0, waterHeight, 2.75));
+            model = glm::scale(model, glm::vec3(3, 1.0, 0.5));
+            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
+            waterShader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(0, waterHeight, -3 + .1));
+            model = glm::scale(model, glm::vec3(4.2, 1.0, .8));
+            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
+            waterShader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(3 - .15, waterHeight, -0.15f));
+            model = glm::scale(model, glm::vec3(0.7, 1.0, 4.0));
+            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
+            waterShader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(-3 + .1f, waterHeight, -0.2f));
+            model = glm::scale(model, glm::vec3(0.8f, 1.0, 3.7));
+            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
+            waterShader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
         glBindVertexArray(0);
 
 
